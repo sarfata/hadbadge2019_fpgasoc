@@ -89,11 +89,11 @@ do_reset:
 	bne a2, zero, secondcpu
 
 	//Set up UART divider for 115200
-	li a1, UART_OFFSET
-	li a2, 414
-	sw a2, UART_DIV_REG(a1)
-	li a2, 24
-	sw a2, UART_IRDA_DIV_REG(a1)
+	//li a1, UART_OFFSET
+	//li a2, 414
+	//sw a2, UART_DIV_REG(a1)
+	//li a2, 24
+	//sw a2, UART_IRDA_DIV_REG(a1)
 
 
 	//Check if we are running in a simulation. If so, immediately jump to app that the simulator already

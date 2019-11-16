@@ -335,9 +335,9 @@ module soc(
 	wire uart_ready;
 
 	// IRDA
-	wire [31:0] irda_rdata;
-	reg  irda_select;
-	wire irda_ready;
+	// wire [31:0] irda_rdata;
+	// reg  irda_select;
+	// wire irda_ready;
 
 	reg misc_select;
 	wire[31:0] ram_rdata;
@@ -413,7 +413,7 @@ module soc(
 	always @(*) begin
 		mem_select = 0;
 		uart_select = 0;
-		irda_select = 0;
+		// irda_select = 0;
 		misc_select = 0;
 		lcd_select = 0;
 		usb_select = 0;
@@ -428,8 +428,8 @@ module soc(
 				uart_select = mem_valid;
 				mem_rdata = uart_rdata;
 			end else begin
-				irda_select = mem_valid;
-				mem_rdata = irda_rdata;
+				// irda_select = mem_valid;
+				// mem_rdata = irda_rdata;
 			end
 		end else if (mem_addr[31:28]=='h2) begin
 			misc_select = mem_valid;
@@ -511,7 +511,7 @@ module soc(
 	end
 `endif
 
-	assign mem_ready = ram_ready || uart_ready || irda_ready || misc_select ||
+	assign mem_ready = ram_ready || uart_ready || /* irda_ready || */ misc_select ||
 			lcd_ready || linerenderer_ready || usb_ready || pic_ready || audio_ready || psram_ready ||| bus_error;
 
 	dsadc dsadc (
@@ -632,6 +632,12 @@ module soc(
 		.rst(rst)
 	);
 
+	ir_modulator irblaster_I (
+		.clk(clk48m),
+		.out(irda_tx)
+	);
+
+/*
 	uart_wb #(
 		.FIFO_DEPTH(16),
 		.DIV_WIDTH(16),
@@ -642,13 +648,14 @@ module soc(
 		.uart_rx(irda_rx),
 		.bus_addr(mem_addr[3:2]),
 		.bus_wdata(mem_wdata),
-		.bus_rdata(irda_rdata),
-		.bus_cyc(irda_select),
-		.bus_ack(irda_ready),
+		// .bus_rdata(irda_rdata),
+		// .bus_cyc(irda_select),
+		// .bus_ack(irda_ready),
 		.bus_we(mem_wstrb != 0),
 		.clk(clk48m),
 		.rst(rst)
 	);
+	*/
 
 	reg [15:0] pic_led;
 	wire [15:0] pic_led_out;
