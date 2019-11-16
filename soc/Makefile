@@ -18,6 +18,7 @@ SRC = \
 	picorv32/picorv32.v \
 	pcpi_fastmul_dsp.v \
 	soc.v \
+	ir_modulator.v \
 	$(NULL)
 
 SRC_SYNTH = \
