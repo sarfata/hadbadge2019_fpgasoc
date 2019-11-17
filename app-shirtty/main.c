@@ -23,6 +23,10 @@ uint8_t *fbmem;
 struct shirtty_mode {
     uint16_t *button_a_pulses;
     uint16_t *button_b_pulses;
+    uint16_t *button_left_pulses;
+    uint16_t *button_right_pulses;
+    uint16_t *button_up_pulses;
+    uint16_t *button_down_pulses;
     void *png_start;
     void *png_end;
 };
@@ -35,6 +39,28 @@ uint16_t vizio_off[] = {
     599, 535, 573, 565, 1694, 566, 573, 561, 598, 536, 629, 483, 599, 561, 1724, 535, 1698, 566, 1698,
     587, 577, 587, 1642, 565, 1725, 535, 1724, 539, 1694, 587, 0
 };
+
+uint16_t climb[] = {
+    299, 260, 295, 260, 270, 260, 248, 790, 269, 785, 274, 260, 295, 760, 295, 264, 244, 
+    264, 270, 260, 295, 759, 308, 751, 299, 760, 269, 790, 269, 786, 273, 260, 299, 760, 
+    270, 260, 273, 261, 269, 264, 295, 760, 299, 760, 269, 786, 269, 269, 295, 0
+};
+uint16_t dive[] = {
+    294, 265, 295, 260, 269, 260, 270, 768, 294, 760, 269, 265, 295, 759, 295, 265, 269, 
+    264, 270, 260, 243, 786, 269, 789, 303, 756, 295, 760, 269, 785, 274, 264, 295, 260, 
+    274, 755, 274, 260, 295, 264, 270, 264, 269, 260, 270, 768, 286, 264, 244, 0
+};
+uint16_t left[] = {
+    300, 260, 273, 256, 274, 260, 269, 764, 299, 756, 308, 251, 273, 756, 299, 230, 308, 
+    256, 273, 260, 248, 781, 300, 768, 290, 760, 299, 756, 299, 760, 299, 230, 310, 254, 
+    247, 257, 299, 755, 299, 231, 307, 256, 274, 755, 299, 261, 273, 233, 301, 0
+};
+uint16_t right[] = {
+    282, 277, 278, 255, 274, 256, 259, 773, 304, 751, 303, 256, 252, 776, 303, 260, 274, 
+    256, 252, 255, 300, 751, 303, 755, 308, 751, 303, 751, 278, 781, 303, 260, 274, 256, 
+    277, 252, 278, 256, 273, 755, 308, 251, 278, 751, 303, 751, 282, 781, 303, 0
+};
+
 uint16_t pulses_nop[] = {0};
 
 struct shirtty_mode modes[] = {
@@ -43,6 +69,10 @@ struct shirtty_mode modes[] = {
         // Vizio Off signal
         .button_a_pulses = vizio_off,
         .button_b_pulses = pulses_nop,
+        .button_left_pulses = pulses_nop,
+        .button_right_pulses = pulses_nop,
+        .button_up_pulses = pulses_nop,
+        .button_down_pulses = pulses_nop,
         .png_start = &_binary_tv_png_start,
         .png_end = &_binary_tv_png_end
 
@@ -53,9 +83,24 @@ struct shirtty_mode modes[] = {
         .button_a_pulses =team_1,
         // Team 2
         .button_b_pulses = team_2,
+        .button_left_pulses = pulses_nop,
+        .button_right_pulses = pulses_nop,
+        .button_up_pulses = pulses_nop,
+        .button_down_pulses = pulses_nop,
         .png_start = &_binary_laser_png_start,
         .png_end = &_binary_laser_png_end
     },
+    // Shark mode
+    {
+        .button_a_pulses = pulses_nop,
+        .button_b_pulses = pulses_nop,
+        .button_left_pulses = left,
+        .button_right_pulses = right,
+        .button_up_pulses = climb,
+        .button_down_pulses = dive,
+        .png_start = &_binary_tv_png_start,
+        .png_end = &_binary_tv_png_end
+    }
 };
 
 
@@ -123,18 +168,42 @@ void main(int argc, char **argv) {
     struct shirtty_mode current_mode = modes[current_mode_index];
 
     // Press LEFT (BACK) to exit the program and go back to main menu
-    while ((MISC_REG(MISC_BTN_REG) & BUTTON_LEFT)==0) {
+    while ((MISC_REG(MISC_BTN_REG) & BUTTON_START)==0) {
         if (MISC_REG(MISC_BTN_REG) & BUTTON_A) {
             fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "SENDING!");
+            fprintf(f, "A!");
             send_ir_pulses(current_mode.button_a_pulses);
             fprintf(f, "\033C");
             delay_us(50000);//debounce
         }
         else if (MISC_REG(MISC_BTN_REG) & BUTTON_B) {
             fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "SENDING!");
+            fprintf(f, "B!");
             send_ir_pulses(current_mode.button_b_pulses);
+            fprintf(f, "\033C");
+            delay_us(50000);//debounce
+        } else if (MISC_REG(MISC_BTN_REG) & BUTTON_LEFT) {
+            fprintf(f, "\033C\0335X\0335Y");
+            fprintf(f, "LEFT!");
+            send_ir_pulses(current_mode.button_left_pulses);
+            fprintf(f, "\033C");
+            delay_us(50000);//debounce
+        } else if (MISC_REG(MISC_BTN_REG) & BUTTON_RIGHT) {
+            fprintf(f, "\033C\0335X\0335Y");
+            fprintf(f, "RIGHT!");
+            send_ir_pulses(current_mode.button_right_pulses);
+            fprintf(f, "\033C");
+            delay_us(50000);//debounce
+        } else if (MISC_REG(MISC_BTN_REG) & BUTTON_UP) {
+            fprintf(f, "\033C\0335X\0335Y");
+            fprintf(f, "CLIMB!");
+            send_ir_pulses(current_mode.button_up_pulses);
+            fprintf(f, "\033C");
+            delay_us(50000);//debounce
+        } else if (MISC_REG(MISC_BTN_REG) & BUTTON_DOWN) {
+            fprintf(f, "\033C\0335X\0335Y");
+            fprintf(f, "DIVE!");
+            send_ir_pulses(current_mode.button_down_pulses);
             fprintf(f, "\033C");
             delay_us(50000);//debounce
         }
