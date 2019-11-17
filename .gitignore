@@ -1,3 +1,4 @@
+.DS_Store
 decode_status_reg
 pll
 *.gtkw
