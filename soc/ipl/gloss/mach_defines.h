@@ -6,40 +6,40 @@
 /* -------------- Main machine defines --------------------- */
 
 /** The external PSRAM starts here. The PSRAM is cached. */
-#define MACH_RAM_START		0x40000000
+#define MACH_RAM_START 0x40000000
 /** Size of RAM on the badge */
-#define MACH_RAM_SIZE		(16*1024*1024)
+#define MACH_RAM_SIZE (16 * 1024 * 1024)
 /** Cache flush region. To make sure all modifications to PSRAM are written
     back to the physical memory for a specific region (e.g. framebuffer memory),
     for a region that starts at MACH_RAM_START+start and ends at MACH_RAM_START+end,
     write 'end' to MACH_FLUSH_REGION+start. Make sure 'start' and 'end' are 4-bit
     aligned. */
-#define MACH_FLUSH_REGION 	0x41000000
+#define MACH_FLUSH_REGION 0x41000000
 
 /** (Not specifically SoC-related) Start of RAM that contains the IPL. */
-#define MEM_IPL_START		0x40002000
+#define MEM_IPL_START 0x40002000
 /** (Not specifically SoC-related) Start of RAM containing the application */
-#define MEM_APP_START		0x40100000
+#define MEM_APP_START 0x40100000
 
 /* -------------- UART defines --------------------- */
 
 /** Start of memory range for the UART peripheral */
-#define UART_OFFSET		0x10000000
+#define UART_OFFSET 0x10000000
 /** Offset of the data register for the debug UART. A write here will send the
     data out of the UART. A write when a send is going on will halt the processor
     until the send is completed. A read will receive any byte that was received by
     the UART since the last read, or 0xFFFFFFFF when none was. There is no receive
     buffer, so it's possible to miss data if you don't poll frequently enough.
     The debug UART is always configured as 8N1. */
-#define UART_DATA_REG	0x00
+#define UART_DATA_REG 0x00
 /** UART divisor register. Baud rate used by the UART is 48MHz/(UART_DIV_REG+2).
     Common rates: 115200 -> 414, 38400 -> 1248, 19200 -> 2498, 9600 -> 4998 */
-#define UART_DIV_REG	0x04
+#define UART_DIV_REG 0x04
 /** Data register for IrDA UART. Works similar to UART_DATA_REG. */
-#define UART_IRDA_DATA_REG	0x10
+// #define UART_IRDA_DATA_REG 0x10
 /** Divisor register for IrDA UART. Baud rate used by IrDA is 48MHz/(16*(UART_IRDA_DIV_REG+2))
  *  Common rate: 115200 -> 24, 38400 -> 76, 19200 -> 154, 9600 -> 310 */
-#define UART_IRDA_DIV_REG	0x14
+// #define UART_IRDA_DIV_REG 0x14
 
 /* -------------- Misc register block defines --------------------- */
 
@@ -48,55 +48,55 @@
 #define MISC_OFFSET 0x20000000
 /** LED offset. The lower bits here map directly to a LED. Write to set the LED
     values. Reading reads the last written value.*/
-#define MISC_LED_REG (0*4)
+#define MISC_LED_REG (0 * 4)
 /** Button register. Reads return the status of the buttons (pressed = 1). Writes
     get ignored. */
-#define MISC_BTN_REG (1*4)
+#define MISC_BTN_REG (1 * 4)
 /** Bitmask for the 'up' button. */
-#define BUTTON_UP (1<<0)
+#define BUTTON_UP (1 << 0)
 /** Bitmask for the 'down' button. */
-#define BUTTON_DOWN (1<<1)
+#define BUTTON_DOWN (1 << 1)
 /** Bitmask for the 'left' button. */
-#define BUTTON_LEFT (1<<2)
+#define BUTTON_LEFT (1 << 2)
 /** Bitmask for the 'right' button. */
-#define BUTTON_RIGHT (1<<3)
+#define BUTTON_RIGHT (1 << 3)
 /** Bitmask for the 'a' button. */
-#define BUTTON_A (1<<4)
+#define BUTTON_A (1 << 4)
 /** Bitmask for the 'b' button. */
-#define BUTTON_B (1<<5)
+#define BUTTON_B (1 << 5)
 /** Bitmask for the 'select' button. */
-#define BUTTON_SELECT (1<<6)
+#define BUTTON_SELECT (1 << 6)
 /** Bitmask for the 'start' button. */
-#define BUTTON_START (1<<7)
+#define BUTTON_START (1 << 7)
 /** SoC version register. Reads return the SoC version. */
-#define MISC_SOC_VER (2*4)
+#define MISC_SOC_VER (2 * 4)
 /** If this bit is set, the software is running in a Verilator simulation. 
     (If you find this bit set on the real badge, please take the red pill.)*/
-#define MISC_SOC_VER_VERILATOR (1<<16)
+#define MISC_SOC_VER_VERILATOR (1 << 16)
 /** This reads the ID of the current CPU reading this. */
-#define MISC_CPU_NO (3*4)
+#define MISC_CPU_NO (3 * 4)
 /** Reset register for various CPUs in the SoC. (ToDo: document) */
-#define MISC_RESETN_REG (6*4)
+#define MISC_RESETN_REG (6 * 4)
 /** Flash control register. Used to read from / write to both the on-board as
     well as the cartridge flash. (ToDo: document)*/
-#define MISC_FLASH_CTL_REG (7*4)
-#define MISC_FLASH_CTL_CLAIM (1<<0)
-#define MISC_FLASH_CTL_IDLE (1<<1) //RO
-#define MISC_FLASH_CTL_DMADONE (1<<2) //RO
+#define MISC_FLASH_CTL_REG (7 * 4)
+#define MISC_FLASH_CTL_CLAIM (1 << 0)
+#define MISC_FLASH_CTL_IDLE (1 << 1)    //RO
+#define MISC_FLASH_CTL_DMADONE (1 << 2) //RO
 /** Flash write register. (ToDo: document) */
-#define MISC_FLASH_WDATA_REG (8*4)
+#define MISC_FLASH_WDATA_REG (8 * 4)
 /** Flash read register. (ToDo: document) */
-#define MISC_FLASH_RDATA_REG (9*4)
+#define MISC_FLASH_RDATA_REG (9 * 4)
 /* Flash DMA: memory address to write block to */
-#define MISC_FLASH_DMAADDR (10*4)
+#define MISC_FLASH_DMAADDR (10 * 4)
 /* Flash DMA: Start byte address in flash to read block from */
-#define MISC_FLASH_RDADDR (11*4)
+#define MISC_FLASH_RDADDR (11 * 4)
 /* Flash DMA: Length. A write here starts a new DMA transfer. Check
    MISC_FLASH_CTL_DMADONE for status. */
-#define MISC_FLASH_DMALEN (12*4)
+#define MISC_FLASH_DMALEN (12 * 4)
 /** Flash selection register. Write a value to select a flash chip. Also
     is used to reboot the FPGA into the next bitstream by pulling the PROGRAMN pin. */
-#define MISC_FLASH_SEL_REG (13*4)
+#define MISC_FLASH_SEL_REG (13 * 4)
 /** Write this to select cartridge flash */
 #define MISC_FLASH_SEL_CARTFLASH 1
 /** Write this to select internal flash */
@@ -104,40 +104,43 @@
 /** Write this to reload the FPGA. Note that ORring this with one of the
    MISC_FLASH_SEL_* values will reload the FPGA from that particular flash
    chip. */
-#define MISC_FLASH_SEL_FPGARELOAD_MAGIC (0xD0F1A5<<8)
+#define MISC_FLASH_SEL_FPGARELOAD_MAGIC (0xD0F1A5 << 8)
 /** Random number register. A read returns a fully random number. Do not read more
     than once every 32 clock cycles for maximum random-ness. */
-#define MISC_RNG_REG (14*4)
+#define MISC_RNG_REG (14 * 4)
 /** SAR ADC register. ToDo: document */
-#define MISC_ADC_CTL_REG (15*4)
-#define MISC_ADC_CTL_ENA (1<<0)
-#define MISC_ADC_CTL_VALID (1<<1)
-#define MISC_ADC_CTL_DIV(x) (x<<16)
+#define MISC_ADC_CTL_REG (15 * 4)
+#define MISC_ADC_CTL_ENA (1 << 0)
+#define MISC_ADC_CTL_VALID (1 << 1)
+#define MISC_ADC_CTL_DIV(x) (x << 16)
 /** SAR ADC value readout */
-#define MISC_ADC_VAL_REG (16*4)
+#define MISC_ADC_VAL_REG (16 * 4)
 /** General I/O input register. Bits 29-0 reflect the values of the corresponding lines on the cartridge I/O connector. */
-#define MISC_GENIO_IN_REG (17*4)
+#define MISC_GENIO_IN_REG (17 * 4)
 /** General I/O output register. Bits 29-0 set the values of the cartridge lines that are selected as outputs. */
-#define MISC_GENIO_OUT_REG (18*4)
+#define MISC_GENIO_OUT_REG (18 * 4)
 /** General I/O output enable registers. Set 1 to any of the bits 29-0 to make the corresponding line into an output. */
-#define MISC_GENIO_OE_REG (19*4)
+#define MISC_GENIO_OE_REG (19 * 4)
 /** Write 1 to set register. Any write of 1 will set the corresponding bit in MISC_GENIO_OUT_REG to 1. */
-#define MISC_GENIO_W2S_REG (20*4)
+#define MISC_GENIO_W2S_REG (20 * 4)
 /** Write 1 to clear register. Any write of 1 will set the corresponding bit in MISC_GENIO_OUT_REG to 0. */
-#define MISC_GENIO_W2C_REG (21*4)
+#define MISC_GENIO_W2C_REG (21 * 4)
 /** Extended I/O input register. The bits here reflect the values of the corresponding lines on the cartridge I/O connector:
    (ToDo: insert mapping here)
    Bit 31 reflects the status of the input-only USB VDET line, which is high when a +5V voltage is on the USB VBUS line.
     */
-#define MISC_GPEXT_IN_REG (22*4)
+#define MISC_GPEXT_IN_REG (22 * 4)
 /** Extended I/O: if a pin is an output, the corresponding bit here will set its value */
-#define MISC_GPEXT_OUT_REG (23*4)
+#define MISC_GPEXT_OUT_REG (23 * 4)
 /** Extended I/O: output enable register */
-#define MISC_GPEXT_OE_REG (24*4)
+#define MISC_GPEXT_OE_REG (24 * 4)
 /** Extended I/O: write 1 to set output register */
-#define MISC_GPEXT_W2S_REG (25*4)
+#define MISC_GPEXT_W2S_REG (25 * 4)
 /** Extended I/O: write 1 to clear output register */
-#define MISC_GPEXT_W2C_REG (26*4)
+#define MISC_GPEXT_W2C_REG (26 * 4)
+
+#define MISC_GPEXT_NEOPIXEL_INDEX_REG (27 * 4)
+#define MISC_GPEXT_NEOPIXEL_DATA_REG (28 * 4)
 
 /** IRDA_SD control {1'h0, irda_sd, 6'h0, pmod_out, 2'h0, sao2_out, 2'h0, sao1_out **/
 
@@ -156,23 +159,23 @@
 /** Control register. Contains various bits that control the LCD. */
 #define LCD_CONTROL_REG 0x8
 /** Backlight enable. Set 1 to light up the backlight. */
-#define LCD_CONTROL_BLEN (1<<0)
+#define LCD_CONTROL_BLEN (1 << 0)
 /** Reset line to the LCD */
-#define LCD_CONTROL_RST (1<<1)
+#define LCD_CONTROL_RST (1 << 1)
 /** Chip select line for the LCD */
-#define LCD_CONTROL_CS (1<<2)
+#define LCD_CONTROL_CS (1 << 2)
 /** Start handing over control to the GFX subsystem. This will set the
     LCD_CONTROL_FBENABLE bit when the next frame starts. */
-#define LCD_CONTROL_FBSTART (1<<3)
+#define LCD_CONTROL_FBSTART (1 << 3)
 /** Hand over control to the GFX subsystem. When set, the GFX subsystem will send pixel data
     to the display. */
-#define LCD_CONTROL_FBENA (1<<4)
+#define LCD_CONTROL_FBENA (1 << 4)
 /** LCD status register */
 #define LCD_STATUS_REG 0xC
 /** Output of the FMARK LCD pin */
-#define LCD_STATUS_FMARK (1<<0)
+#define LCD_STATUS_FMARK (1 << 0)
 /** Output of the ID LCD pin */
-#define LCD_STATUS_ID (1<<1)
+#define LCD_STATUS_ID (1 << 1)
 /** Command that is sent before a new frame is transmitted. */
 #define LCD_FB_STARTCMD 0x10
 /** Backlight PWM width control. Lower 16 bits control how much backlight to give, 
@@ -248,17 +251,17 @@ fill the palette memory), the fields are
 /** Framebuffer layer enable. If 1, the framebuffer is displayed.  Note
     that disabling this also disables the DMA retrieving the framebuffer
     pixels, leading to a slight speedup of the rest of the system. */
-#define GFX_LAYEREN_FB (1<<0)
+#define GFX_LAYEREN_FB (1 << 0)
 /** Tile A enable register. If 1, the tile B layer is displayed. */
-#define GFX_LAYEREN_TILEA (1<<1)
+#define GFX_LAYEREN_TILEA (1 << 1)
 /** Tile B enable register. If 1, the tile B layer is displayed. */
-#define GFX_LAYEREN_TILEB (1<<2)
+#define GFX_LAYEREN_TILEB (1 << 2)
 /** Sprite enable register. If 1, the sprite layer is displayed. */
-#define GFX_LAYEREN_SPR (1<<3)
+#define GFX_LAYEREN_SPR (1 << 3)
 /** Set this to 1 to make the framebuffer memory contain 8-bit values,
     making for a 256-color framebuffer. If 0, the framebuffer memory
     is only 4-bit, giving an 16-bit bitmap. */
-#define GFX_LAYEREN_FB_8BIT (1<<16)
+#define GFX_LAYEREN_FB_8BIT (1 << 16)
 /** Register to specify where in the virtual tilemap space the 'real'
     (0,0) retrieves its data from. */
 #define GFX_TILEA_OFF 0x0C
@@ -328,7 +331,7 @@ fill the palette memory), the fields are
 #define GFX_COPPER_CTL_REG 0x34
 /** [31]: Copper enable register. Setting this enables the copper. 
     Clearing this disables & resets the copper. */
-#define GFX_COPPER_CTL_RUN (1<<31)
+#define GFX_COPPER_CTL_RUN (1 << 31)
 /** [30:0]: Current copper PC. Indicates which word in the copper
     list (at GFX_OFFSET_COPPERMEM) the copper is currently 
     processing. Read-only. */
@@ -353,11 +356,11 @@ fill the palette memory), the fields are
 /** Bits [8:0]: Tile to use for this entry */
 #define GFX_TILEMAP_ENT_TILE_OFF 0
 /** Bit [9]: Flip tile horizontally */
-#define GFX_TILEMAP_ENT_FLIP_X (1<<9)
+#define GFX_TILEMAP_ENT_FLIP_X (1 << 9)
 /** Bit [10]: Flip tile vertically */
-#define GFX_TILEMAP_ENT_FLIP_Y (1<<10)
+#define GFX_TILEMAP_ENT_FLIP_Y (1 << 10)
 /** Bit [10]: Swap x and y of tile (diagonal flip). This happens before the other flips. */
-#define GFX_TILEMAP_ENT_SWAP_XY (1<<11)
+#define GFX_TILEMAP_ENT_SWAP_XY (1 << 11)
 /** Bit [17:12]: Palette offset. If this is set to i, the 16 colors of 
     the tile will be looked up in the palette memory starting from entry 
     (i*8). */
@@ -373,15 +376,15 @@ fill the palette memory), the fields are
 /** Word 0, bits [13:0]: X position of top left corner of sprite */
 #define GFX_SPRITE_ENT_XPOS_OFF 0
 /** Word 0, bit [14]: X chain. Unused for now. */
-#define GFX_SPRITE_ENT_XCHAIN (1<<14)
+#define GFX_SPRITE_ENT_XCHAIN (1 << 14)
 /** Word 0, bit [15]: X flip of tile. */
-#define GFX_SPRITE_ENT_XFLIP (1<<15)
+#define GFX_SPRITE_ENT_XFLIP (1 << 15)
 /** Word 0, bits [29:16]: Y position of top left corner of sprite */
 #define GFX_SPRITE_ENT_YPOS_OFF 16
 /** Word 0, bit [30]: Y chain. Unused for now. */
-#define GFX_SPRITE_ENT_YCHAIN (1<<30)
+#define GFX_SPRITE_ENT_YCHAIN (1 << 30)
 /** Word 0, bit [31]: Y flip of tile. */
-#define GFX_SPRITE_ENT_YFLIP (1<<31)
+#define GFX_SPRITE_ENT_YFLIP (1 << 31)
 /** Word 1, bit [7:0]: X size. The tile for this sprite will be scaled horizontally
     to this size, in pixels. 16 for no scale.*/
 #define GFX_SPRITE_ENT_XSIZE_OFF 0
@@ -392,8 +395,6 @@ fill the palette memory), the fields are
 #define GFX_SPRITE_ENT_TILE_OFF 16
 /** Word 1, bit [31:25]: Palette selection. */
 #define GFX_SPRITE_ENT_PALSEL_OFF 25
-
-
 
 /* Offset to tile memory. This contains the pixel data of all 512 tiles
 as 32 32-bit words. The pixel data is stored little-endian, so e.g:
@@ -420,7 +421,7 @@ pixel (0,1) of a tile is stored in bits [3:0] of word 2
  (0,0) to wait for a new screen to be drawn. Note that sprites 
  graphics are actually calculated one line earlier than they are 
  drawn. */
-#define COPPER_OP_WAIT(x, y) (0x80000000 | (y<<16) | (x))
+#define COPPER_OP_WAIT(x, y) (0x80000000 | (y << 16) | (x))
 
 /* This instruction resets the copper PC to the start of the copper
  list, making it start over. */
@@ -434,7 +435,7 @@ pixel (0,1) of a tile is stored in bits [3:0] of word 2
  RiscV processor would use to write into the register. Ct is the number
  of words that are written, from 1 to 4. The word data follows this 
  instruction and is written into consecutive addresses. */
-#define COPPER_OP_WRITE(addr, ct) (((uint32_t)addr & 0xfffffffc)|(ct-1))
+#define COPPER_OP_WRITE(addr, ct) (((uint32_t)addr & 0xfffffffc) | (ct - 1))
 
 /* -------------- PIC peripheral defines --------------------- */
 
@@ -447,14 +448,14 @@ thinking about to it without taking up CPU power on the main processor. */
 #define PIC_CTL_REG 0x0
 /** Reset bit. Setting this to 1 keeps the PIC in reset, setting it to 0
     allows it to run. */
-#define PIC_CTL_RESET (1<<0)
+#define PIC_CTL_RESET (1 << 0)
 /** This bit is directly connected to the INT0 IRQ line. Use this to 
     send an interrupt to the PIC */
-#define PIC_CTL_INT0 (1<<1)
+#define PIC_CTL_INT0 (1 << 1)
 /** LED passthrough. If 1, the RiscV controls the LEDs. If 0, the desired
     LED state is available to the pic to read, but it can control the
     outputs to the LED itself. */
-#define PIC_CTL_PASSTHRU (1<<2)
+#define PIC_CTL_PASSTHRU (1 << 2)
 /** PIC RAM. This is implemented as 256 32-bit words, with the 
     bottom 8 bits mapped to a byte in the PIC; the upper 24 bit read 0
     and are ignored when written. */
@@ -472,12 +473,12 @@ thinking about to it without taking up CPU power on the main processor. */
 /** Offset to the USB core registers */
 #define USB_COREREGS 0x00000
 /** Offset to USB core receive memory. Read-only. */
-#define USB_RXMEM    0x10000
+#define USB_RXMEM 0x10000
 /** Offset to USB core transmit memory. Write-only. */
-#define USB_TXMEM    0x20000
+#define USB_TXMEM 0x20000
 
-#define USB_DATA_BASE_RX (USB_CORE_OFFSET+USB_RXMEM)
-#define USB_DATA_BASE_TX (USB_CORE_OFFSET+USB_TXMEM)
+#define USB_DATA_BASE_RX (USB_CORE_OFFSET + USB_RXMEM)
+#define USB_DATA_BASE_TX (USB_CORE_OFFSET + USB_TXMEM)
 
 /* -------------------- Audio / Synthesizer defines ------------------- */
 /* 
@@ -552,29 +553,29 @@ but this should get you started.
    will play the sawtooth voice 1 for around 100 ms at around 137 Hz
 */
 
-#define AUDIO_CORE_BASE         0x80000000
-#define AUDIO_PLAY_REG_OFFSET   0x0
+#define AUDIO_CORE_BASE 0x80000000
+#define AUDIO_PLAY_REG_OFFSET 0x0
 #define AUDIO_CONFIG_REG_OFFSET 0x4
 #define AUDIO_FILTER_REG_OFFSET 0x8 // (TBD)
-#define AUDIO_MISC_REG_OFFSET   0xC // (TBD)
+#define AUDIO_MISC_REG_OFFSET 0xC   // (TBD)
 
-#define AUDIO_VOICE_SAW1   0x00
-#define AUDIO_VOICE_SAW2   0x10
-#define AUDIO_VOICE_PULSE  0x20
+#define AUDIO_VOICE_SAW1 0x00
+#define AUDIO_VOICE_SAW2 0x10
+#define AUDIO_VOICE_PULSE 0x20
 #define AUDIO_VOICE_SQUARE 0x30
-#define AUDIO_VOICE_TRI1   0x40
-#define AUDIO_VOICE_TRI2   0x50
-#define AUDIO_VOICE_TRI3   0x60
-#define AUDIO_VOICE_TRI4   0x70
+#define AUDIO_VOICE_TRI1 0x40
+#define AUDIO_VOICE_TRI2 0x50
+#define AUDIO_VOICE_TRI3 0x60
+#define AUDIO_VOICE_TRI4 0x70
 
-#define AUDIO_PITCH(x)    (x)
+#define AUDIO_PITCH(x) (x)
 #define AUDIO_DURATION(x) (x << 16)
 
-#define AUDIO_ATTACK(x)   (x)
-#define AUDIO_RELEASE(x)  (x << 8)
+#define AUDIO_ATTACK(x) (x)
+#define AUDIO_RELEASE(x) (x << 8)
 
-#define AUDIO_PCM           0xC0
-#define AUDIO_DRUMS         0xD0
+#define AUDIO_PCM 0xC0
+#define AUDIO_DRUMS 0xD0
 #define AUDIO_CONFIG_VOLUME 0xF0
 
 /* -------------- PSRAM peripheral defines --------------------- */
@@ -582,14 +583,14 @@ but this should get you started.
 /** Offset of the manual control for PSRAM */
 #define PSRAM_CMD_OFFSET 0x90000000
 
-#define PSRAM_CMD_CSR		0x00
-#define PSRAM_CMD_RSP_NOWAIT	0x08
-#define PSRAM_CMD_RSP_BLOCK	0x0C
-#define PSRAM_CMD_SPI_WR_16B	0x20
-#define PSRAM_CMD_SPI_WR_32B	0x24
-#define PSRAM_CMD_SPI_RD_16B	0x28
-#define PSRAM_CMD_SPI_RD_32B	0x2C
-#define PSRAM_CMD_QPI_WR_16B	0x30
-#define PSRAM_CMD_QPI_WR_32B	0x34
-#define PSRAM_CMD_QPI_RD_16B	0x38
-#define PSRAM_CMD_QPI_RD_32B	0x3C
+#define PSRAM_CMD_CSR 0x00
+#define PSRAM_CMD_RSP_NOWAIT 0x08
+#define PSRAM_CMD_RSP_BLOCK 0x0C
+#define PSRAM_CMD_SPI_WR_16B 0x20
+#define PSRAM_CMD_SPI_WR_32B 0x24
+#define PSRAM_CMD_SPI_RD_16B 0x28
+#define PSRAM_CMD_SPI_RD_32B 0x2C
+#define PSRAM_CMD_QPI_WR_16B 0x30
+#define PSRAM_CMD_QPI_WR_32B 0x34
+#define PSRAM_CMD_QPI_RD_16B 0x38
+#define PSRAM_CMD_QPI_RD_32B 0x3C

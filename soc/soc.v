@@ -107,6 +107,8 @@ module soc(
 		input [7:0] pmod_in,
 		output reg [7:0] pmod_out,
 		output reg [7:0] pmod_oe,
+
+		output reg neopixel,
 		
 		output reg trace_en
 	);
@@ -400,6 +402,8 @@ module soc(
 	parameter MISC_REG_GPEXT_OE = 24;
 	parameter MISC_REG_GPEXT_W2S = 25;
 	parameter MISC_REG_GPEXT_W2C = 26;
+	parameter MISC_REG_GPEXT_NEOPIXEL_INDEX = 27;
+	parameter MISC_REG_GPEXT_NEOPIXEL_DATA = 28;
 
 	wire [31:0] rngno;
 	rng rng(
@@ -635,6 +639,19 @@ module soc(
 	ir_modulator irblaster_I (
 		.clk(clk48m),
 		.out(irda_tx)
+	);
+
+	reg [23:0] neopixel_data;
+	reg [7:0] neopixel_index;
+	reg neopixel_write;
+
+	ws2812 ws2812_I (
+		.data(neopixel),
+		.clk(clk96m),
+		.rgb_data(neopixel_data[23:0]),
+		.led_num(neopixel_index),
+		.write(neopixel_write),
+		.reset(rst)
 	);
 
 /*
@@ -956,6 +973,9 @@ module soc(
 			flash_dmaaddr <= 0;
 			flash_rdaddr <= 0;
 			flash_dmalen <= 0;
+			neopixel_data <= 0;
+			neopixel_index <= 0;
+			neopixel_write <= 0;
 		end else begin
 			fsel_strobe <= 0;
 			flash_dma_run <= 0;
@@ -1014,6 +1034,11 @@ module soc(
 					pmod_out <= pmod_out & ~mem_wdata[23:16];
 					sao2_out <= sao2_out & ~mem_wdata[13:8];
 					sao1_out <= sao1_out & ~mem_wdata[5:0];
+				end else if (mem_addr[6:2]==MISC_REG_GPEXT_NEOPIXEL_INDEX) begin
+					neopixel_index <= mem_wdata;
+				end else if (mem_addr[6:2]==MISC_REG_GPEXT_NEOPIXEL_DATA) begin
+					neopixel_data <= mem_wdata;
+					neopixel_write <= 1;
 				end
 			end
 		end

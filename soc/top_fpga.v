@@ -92,6 +92,7 @@ module top_fpga(
 		inout [5:0] sao1,
 		inout [5:0] sao2,
 		inout [7:0] pmod,
+		output neopixel,
 
 		output adcrefout,
 		input adcref4
@@ -244,7 +245,8 @@ module top_fpga(
 		.sao2_oe(sao2_oe),
 		.pmod_in(pmod_in),
 		.pmod_out(pmod_out),
-		.pmod_oe(pmod_oe)
+		.pmod_oe(pmod_oe),
+		.neopixel(neopixel)
 	);
 
 	sysmgr sysmgr_I (
