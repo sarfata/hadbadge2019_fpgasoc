@@ -139,6 +139,10 @@
 /** Extended I/O: write 1 to clear output register */
 #define MISC_GPEXT_W2C_REG (26*4)
 
+/** IRDA_SD control {1'h0, irda_sd, 6'h0, pmod_out, 2'h0, sao2_out, 2'h0, sao1_out **/
+
+#define MISC_GPEXT_OUT_REG_IRDA_SD (1 << 30)
+
 /* -------------- LCD interface defines --------------------- */
 
 /** Offset to the LCD controller. This allows you to send commands and data directly to the LCD. Note
