@@ -15,7 +15,6 @@ extern char _binary_laser_png_end;
 //Pointer to the framebuffer memory.
 uint8_t *fbmem;
 
-
 #define FB_WIDTH 512
 #define FB_HEIGHT 320
 #define FB_PAL_OFFSET 256
@@ -64,33 +63,18 @@ uint16_t right[] = {
 uint16_t pulses_nop[] = {0};
 
 struct shirtty_mode modes[] = {
-    // TV B Gone mode
+    // Basic Shark Mode
     {
-        // Vizio Off signal
-        .button_a_pulses = vizio_off,
+        .button_a_pulses = pulses_nop,
         .button_b_pulses = pulses_nop,
-        .button_left_pulses = pulses_nop,
-        .button_right_pulses = pulses_nop,
-        .button_up_pulses = pulses_nop,
-        .button_down_pulses = pulses_nop,
-        .png_start = &_binary_tv_png_start,
-        .png_end = &_binary_tv_png_end
-
-    },
-    // Nerf Gun - Laser Tag mode
-    {
-        // Team 1
-        .button_a_pulses =team_1,
-        // Team 2
-        .button_b_pulses = team_2,
-        .button_left_pulses = pulses_nop,
-        .button_right_pulses = pulses_nop,
-        .button_up_pulses = pulses_nop,
-        .button_down_pulses = pulses_nop,
+        .button_left_pulses = left,
+        .button_right_pulses = right,
+        .button_up_pulses = climb,
+        .button_down_pulses = dive,
         .png_start = &_binary_laser_png_start,
         .png_end = &_binary_laser_png_end
     },
-    // Shark mode
+    // Upgraded Shark mode
     {
         .button_a_pulses = pulses_nop,
         .button_b_pulses = pulses_nop,
@@ -100,6 +84,19 @@ struct shirtty_mode modes[] = {
         .button_down_pulses = dive,
         .png_start = &_binary_tv_png_start,
         .png_end = &_binary_tv_png_end
+    },
+    // Nerf Gun - Laser Tag mode
+    {
+        // Team 1
+        .button_a_pulses = team_1,
+        // Team 2
+        .button_b_pulses = team_2,
+        .button_left_pulses = pulses_nop,
+        .button_right_pulses = pulses_nop,
+        .button_up_pulses = pulses_nop,
+        .button_down_pulses = pulses_nop,
+        .png_start = &_binary_laser_png_start,
+        .png_end = &_binary_laser_png_end
     }
 };
 
@@ -110,6 +107,22 @@ static void delay_us(int us)
     // Our best scientists figured out this constant via rigorous theoretical work
     us = us * 1.16;
     for (volatile int t=0; t<us; t++);
+}
+
+uint32_t counter60hz(void) {
+	return GFX_REG(GFX_VBLCTR_REG);
+}
+
+uint16_t counter_sec(void) {
+    return counter60hz() / 60;
+}
+
+float counter_min(void) {
+    return (counter60hz() / 60.0) * 0.01666;
+}
+
+uint32_t counter_ms(void) {
+    return (counter60hz() / 60.0) * 1000;
 }
 
 /*
@@ -125,12 +138,133 @@ void send_ir_pulses(uint16_t pulses[]) {
     MISC_REG(MISC_GPEXT_W2S_REG) = 0xff00;
 
     for (int i = 0; pulses[i] > 0; i++) {
-        // Start by clearing (to turn on) and then alternate
         MISC_REG(i%2 == 0 ? MISC_GPEXT_W2C_REG:MISC_GPEXT_W2S_REG) = MISC_GPEXT_OUT_REG_IRDA_SD;
+        // Start by clearing (to turn on) and then alternate
         delay_us(pulses[i]);
     }
     // Set the POWERDOWN signal HIGH to shutdown the IR transmission.
     MISC_REG(MISC_GPEXT_W2S_REG) = MISC_GPEXT_OUT_REG_IRDA_SD;
+}
+
+// fprintf(f, "\033C\0335X\0335Y");
+
+void periodic_pulse(uint32_t on_time_ms, uint16_t pulses[]) {
+    uint32_t start_time_ms = counter_ms();
+    while (counter_ms() < start_time_ms + on_time_ms) {
+        send_ir_pulses(pulses);
+    }
+}
+
+void flap_right(FILE *f, int speed) {
+    // fprintf(f, "ON RIGHT!");
+    // periodic_pulse(750, current_mode.button_right_pulses);
+    // fprintf(f, "OFF RIGHT!");
+    // delay_us(750000);// 500ms
+
+    // fprintf(f, "\033C FAST RIGHT!");
+    fprintf(f, "\0336X\0334Y*");
+
+    periodic_pulse(500, right);
+    delay_us(50000);//debounce
+    // fprintf(f, "\033C FAST RIGHT RESET!"); 
+    periodic_pulse(250, left);
+    delay_us(50000);//debounce
+    fprintf(f, "\0336X\0334YF");
+
+}
+
+void flap_left(FILE *f, int speed) {
+    if (speed == 1) {
+        // fprintf(f, "\033C ON LEFT!");
+        periodic_pulse(750, left);
+        // fprintf(f, "\033C OFF LEFT!");
+        delay_us(750000);// 500ms
+    } else if (speed == 2) {
+        // fprintf(f, "\033C MID LEFT!");
+        periodic_pulse(500, left);
+        // fprintf(f, "\033C MID LEFT!");
+        delay_us(500000);// 500ms
+    } else if (speed == 3) {
+        fprintf(f, "\0332X\0334Y*");
+        // fprintf(f, "\033C FAST LEFT!");
+        periodic_pulse(500, left);
+        delay_us(50000);//debounce
+        // fprintf(f, "\033C FAST LEFT RESET!"); 
+        periodic_pulse(250, right);
+        delay_us(50000);//debounce
+        fprintf(f, "\0332X\0334YF");
+    }
+}
+
+void flap_forward(FILE *f) {
+    // fprintf(f, "FORWARD LEFT!");
+    periodic_pulse(500, left);
+    delay_us(250000);// 250ms
+    // fprintf(f, "FORWARD RIGHT!");
+    periodic_pulse(500, right);
+    delay_us(250000);// 250ms
+}
+
+void basic_left(FILE *f, struct shirtty_mode current_mode) {
+    fprintf(f, "\0332X\0334Y*");
+    send_ir_pulses(left);
+    delay_us(50000);//debounce
+    fprintf(f, "\0332X\0334Y ");
+}
+
+void basic_right(FILE *f) {
+    fprintf(f, "\0336X\0334Y*");
+    send_ir_pulses(right);
+    delay_us(50000);//debounce
+    fprintf(f, "\0336X\0334Y ");
+}
+
+void basic_dive(FILE *f) {
+    // fprintf(f, "DIVE!");
+    send_ir_pulses(dive);
+    delay_us(50000);//debounce
+}
+
+void basic_climb(FILE *f) {
+    // fprintf(f, "CLIMB!");
+    send_ir_pulses(climb);
+    delay_us(50000);//debounce
+}
+
+void tag_team_a(FILE *f) {
+    // fprintf(f, "\033C\0335X\0335Y");
+    // fprintf(f, "Tag Team 1!");
+    send_ir_pulses(team_1);
+    // fprintf(f, "\033C");
+    delay_us(500000);//debounce
+}
+
+void controls(FILE *f, int current_mode_index) {
+    if (current_mode_index == 0) {
+        fprintf(f, "\033C\0331X\0331Y");
+        fprintf(f, "Sharks Can Fly!");
+        fprintf(f, "\0334X\0333Y");
+        fprintf(f, "C");
+        fprintf(f, "\0333X\0334Y");
+        fprintf(f, "L R");
+        fprintf(f, "\0334X\0335Y");
+        fprintf(f, "D");
+    } else if (current_mode_index == 1) {
+        fprintf(f, "\033C\0331X\0331Y");
+        fprintf(f, "Sharky BEAST MODE!");
+
+        fprintf(f, "\0335X\0333Y");
+        fprintf(f, "C");
+        fprintf(f, "\0333X\0334Y");
+        fprintf(f, "FL FR");
+        fprintf(f, "\0335X\0335Y");
+        fprintf(f, "D");
+        fprintf(f, "\03310X\0334Y");
+        fprintf(f, "FORWARD");
+    } else if (current_mode_index == 2) {
+        fprintf(f, "\033C\0331X\0331Y");
+        fprintf(f, "Norf Laser Tag!");
+    }
 }
 
 void main(int argc, char **argv) {
@@ -150,8 +284,8 @@ void main(int argc, char **argv) {
 
     //Now, use a library function to load the image into the framebuffer memory. This function will also set up the palette entries,
     //we tell it to start writing from entry 128.
-    int png_size=(&_binary_tv_png_end-&_binary_tv_png_start);
-    gfx_load_fb_mem(fbmem, &GFXPAL[FB_PAL_OFFSET], 4, 512, &_binary_tv_png_start, png_size);
+    int png_size=(&_binary_laser_png_end-&_binary_laser_png_start);
+    gfx_load_fb_mem(fbmem, &GFXPAL[FB_PAL_OFFSET], 4, 512, &_binary_laser_png_start, png_size);
 
     //Flush the memory region to psram so the GFX hw can stream it from there.
     cache_flush(fbmem, fbmem+FB_WIDTH*FB_HEIGHT);
@@ -167,45 +301,58 @@ void main(int argc, char **argv) {
     int current_mode_index = 0;
     struct shirtty_mode current_mode = modes[current_mode_index];
 
+    controls(f, current_mode_index);
+
     // Press LEFT (BACK) to exit the program and go back to main menu
     while ((MISC_REG(MISC_BTN_REG) & BUTTON_START)==0) {
+        // fprintf(f, "\033C");
+        // 60Hz = ~17ms
+        // (1000/16.666)*(1-0.16) = ~49 
+        // The magic 16% faster is back! 49
+        // if (counter60hz() % 3 == 0) { 
+        //     fprintf(f, "\033C%d %d %.2f", counter_sec(), counter_ms(), counter_min());
+        // }
         if (MISC_REG(MISC_BTN_REG) & BUTTON_A) {
-            fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "A!");
-            send_ir_pulses(current_mode.button_a_pulses);
-            fprintf(f, "\033C");
-            delay_us(50000);//debounce
+            if (current_mode_index == 0) {
+
+            } else if (current_mode_index == 1) {
+                flap_forward(f);
+            } else if (current_mode_index == 2) {
+                tag_team_a(f);
+            }
         }
         else if (MISC_REG(MISC_BTN_REG) & BUTTON_B) {
-            fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "B!");
-            send_ir_pulses(current_mode.button_b_pulses);
-            fprintf(f, "\033C");
-            delay_us(50000);//debounce
+            if (current_mode_index == 0) {
+
+            } else if (current_mode_index == 1) {
+
+            } else if (current_mode_index == 2) {
+                // fprintf(f, "\033C\0335X\0335Y");
+                // fprintf(f, "Tag Team B!");
+                send_ir_pulses(team_2);
+                // fprintf(f, "\033C");
+                delay_us(50000);//debounce
+            }     
         } else if (MISC_REG(MISC_BTN_REG) & BUTTON_LEFT) {
-            fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "LEFT!");
-            send_ir_pulses(current_mode.button_left_pulses);
-            fprintf(f, "\033C");
-            delay_us(50000);//debounce
+            if (current_mode_index == 0) {
+                basic_left(f, current_mode);
+            } else if (current_mode_index == 1) {
+                flap_left(f, 3);
+            }
         } else if (MISC_REG(MISC_BTN_REG) & BUTTON_RIGHT) {
-            fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "RIGHT!");
-            send_ir_pulses(current_mode.button_right_pulses);
-            fprintf(f, "\033C");
-            delay_us(50000);//debounce
+            if (current_mode_index == 0) {
+                basic_right(f);
+            } else if (current_mode_index == 1) {
+                flap_right(f, 1);
+            }
         } else if (MISC_REG(MISC_BTN_REG) & BUTTON_UP) {
-            fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "CLIMB!");
-            send_ir_pulses(current_mode.button_up_pulses);
-            fprintf(f, "\033C");
-            delay_us(50000);//debounce
+            if (current_mode_index == 0 || current_mode_index == 1) {
+                basic_dive(f);
+            }
         } else if (MISC_REG(MISC_BTN_REG) & BUTTON_DOWN) {
-            fprintf(f, "\033C\0335X\0335Y");
-            fprintf(f, "DIVE!");
-            send_ir_pulses(current_mode.button_down_pulses);
-            fprintf(f, "\033C");
-            delay_us(50000);//debounce
+            if (current_mode_index == 0 || current_mode_index == 1) {
+                basic_climb(f);
+            }
         }
         else if (MISC_REG(MISC_BTN_REG) & BUTTON_SELECT) {
             current_mode_index = (current_mode_index + 1) % (sizeof(modes)/sizeof(modes[0]));
@@ -217,6 +364,8 @@ void main(int argc, char **argv) {
 
             //Flush the memory region to psram so the GFX hw can stream it from there.
             cache_flush(fbmem, fbmem+FB_WIDTH*FB_HEIGHT);
+
+            controls(f, current_mode_index);
         }
 
     }
