@@ -1,0 +1,5 @@
+*.bit
+*.svf
+*.json
+*.config
+obj_dir

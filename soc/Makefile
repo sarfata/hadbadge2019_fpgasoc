@@ -19,6 +19,7 @@ SRC = \
 	pcpi_fastmul_dsp.v \
 	soc.v \
 	ir_modulator.v \
+	ws2812core/ws2812.v \
 	$(NULL)
 
 SRC_SYNTH = \
